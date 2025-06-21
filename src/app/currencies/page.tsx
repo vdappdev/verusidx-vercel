@@ -1,15 +1,14 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { ChevronUp, ChevronDown, Loader2, ExternalLink, X } from 'lucide-react'
-import Link from 'next/link'
+import { ChevronUp, ChevronDown, Loader2, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
 const UNIQUE_TYPE_LABELS = [
   { label: 'Simple Token', isType: (opt: number) => opt === 32 || opt === 40 },
   { label: 'Basket Currency', isType: (opt: number) => opt === 33 || opt === 41 },
   { label: 'Gateway Converter', isType: (opt: number) => opt === 545 },
-  { label: 'Gateway', isType: (opt: number) => opt === 128 },
+  { label: 'Outside System', isType: (opt: number) => opt === 128 },
   { label: 'PBaaS Chain', isType: (opt: number) => opt === 264 || opt === 268 },
   { label: 'ID Control Token', isType: (opt: number) => opt === 2080 },
 ]
@@ -25,11 +24,9 @@ const SYSTEMTYPES = ['local', 'imported', 'gateway', 'pbaas']
 export default function CurrenciesPage() {
   // --- Param state for custom queries
   const [systemtype, setSystemType] = useState('')
-  const [erc20Active, setErc20Active] = useState(false)
   const [converter1, setConverter1] = useState('')
   const [converter2, setConverter2] = useState('')
-  const [customConvertersActive, setCustomConvertersActive] = useState(false)
-  const [activeSource, setActiveSource] = useState('default') // "default" | "systemtype" | "erc20" | "converter"
+  const [activeSource, setActiveSource] = useState<'default' | 'systemtype' | 'erc20' | 'converter'>('default')
 
   // Table state
   const [page, setPage] = useState(1)
@@ -38,7 +35,7 @@ export default function CurrenciesPage() {
   const [filterProof, setFilterProof] = useState<string>('all')
 
   // -- ListCurrencies API Param construction
-  let rpcParams: Record<string,any> = {}
+  let rpcParams: Record<string, unknown> = {}
   if (activeSource === 'systemtype' && systemtype) rpcParams = { systemtype }
   if (activeSource === 'erc20') rpcParams = { fromsystem: 'veth' }
   if (activeSource === 'converter' && (converter1 || converter2)) {
@@ -47,7 +44,6 @@ export default function CurrenciesPage() {
 
   // Query (using rpcParams)
   const { data, isLoading, error, refetch, isFetching } = useQuery({
-    // key must include param value for caching
     queryKey: ['listcurrencies', JSON.stringify(rpcParams)],
     queryFn: async () => {
       const res = await fetch('/api/listcurrencies', {
@@ -97,24 +93,22 @@ export default function CurrenciesPage() {
 
   // -- Button/Shortcut actions
   const clickDefault = () => {
-    setActiveSource('default'); setSystemType(''); setErc20Active(false); setCustomConvertersActive(false)
-    setConverter1(''); setConverter2(''); setPage(1)
+    setActiveSource('default'); setSystemType(''); setConverter1(''); setConverter2(''); setPage(1)
     refetch()
   }
   const clickSystemType = (val: string) => {
     setSystemType(val); setActiveSource('systemtype')
-    setErc20Active(false); setCustomConvertersActive(false)
     setConverter1(''); setConverter2(''); setPage(1)
     refetch()
   }
   const clickERC20 = () => {
-    setActiveSource('erc20'); setSystemType(''); setErc20Active(true); setCustomConvertersActive(false)
+    setActiveSource('erc20'); setSystemType('')
     setConverter1(''); setConverter2(''); setPage(1)
     refetch()
   }
   const clickConverters = () => {
-    setActiveSource('converter'); setErc20Active(false); setSystemType('')
-    setCustomConvertersActive(true); setPage(1)
+    setActiveSource('converter'); setSystemType('')
+    setPage(1)
     refetch()
   }
   // For showing active chips/tags
@@ -169,7 +163,7 @@ export default function CurrenciesPage() {
             value={converter1}
             onChange={e => setConverter1(e.target.value)}
             placeholder="Reserve Name"
-            className="px-1 py-1 rounded border dark:bg-[#232323] dark:text-white"
+            className="px-1 py-1 rounded border dark:bg-[#232323] dark:text-white text-xs"
             style={{width: 120}}
           />
           <input
@@ -177,7 +171,7 @@ export default function CurrenciesPage() {
             value={converter2}
             onChange={e => setConverter2(e.target.value)}
             placeholder="Reserve (optional)"
-            className="px-0.1 py-1 rounded border dark:bg-[#232323] dark:text-white"
+            className="px-1 py-1 rounded border dark:bg-[#232323] dark:text-white text-xs"
             style={{width: 140}}
           />
           <button
@@ -323,35 +317,7 @@ export default function CurrenciesPage() {
   )
 }
 
-// --- Helper components/functions ---
-
-function StartBlockExplorer({ blockheight }: { blockheight?: number }) {
-  const [blockhash, setBlockhash] = useState<string | null>(null)
-  useState(() => {
-    setBlockhash(null)
-    if (typeof blockheight !== 'number' || isNaN(blockheight)) return
-    fetch('/api/getblockhash', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ height: blockheight }),
-    })
-      .then(res => res.json())
-      .then(data => setBlockhash(typeof data.result === 'string' ? data.result : null))
-      .catch(() => setBlockhash(null))
-  })
-  if (!blockheight || isNaN(blockheight)) return <>-</>
-  if (!blockhash) return <span>{blockheight} <Loader2 className="inline h-3 w-3 animate-spin" /></span>
-  return (
-    <a
-      href={`https://insight.verus.io/block/${blockhash}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:underline inline-flex items-center"
-    >
-      {blockheight} <ExternalLink className="h-3 w-3 ml-1" />
-    </a>
-  )
-}
+// --- Helper functions/types ---
 
 function getTypeLabel(opt: number): string {
   const found = UNIQUE_TYPE_LABELS.find(t => t.isType(opt))
@@ -360,7 +326,7 @@ function getTypeLabel(opt: number): string {
 function getProvenanceLabel(proof: number): string {
   return PROVENANCE_MAP[proof] || `Other (${proof})`
 }
-function formatSupply(val: any): string {
+function formatSupply(val: unknown): string {
   if (!val && val !== 0) return '-'
   return Number(val).toLocaleString(undefined, { minimumFractionDigits: 8, maximumFractionDigits: 8 })
 }
@@ -376,4 +342,3 @@ type CurrencyListItem = {
   }
   bestcurrencystate?: { supply?: number }
 }
-

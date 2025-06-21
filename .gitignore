@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Ignore error logs file
+error logs.md
+
+# Ignore the RPC commands folder (all files in it)
+RPC commands for ai/

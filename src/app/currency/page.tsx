@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
@@ -9,32 +9,69 @@ import { Button } from '@/components/ui/button'
 import { Copy, Loader2, Search } from 'lucide-react'
 import { toast } from "sonner"
 
+// --- TYPES ---
+interface Preallocation {
+  [address: string]: number
+}
+interface ReserveCurrency {
+  currencyid: string
+  weight: number
+  reserves: number
+  priceinreserve: number
+}
+
+interface CurrencyResult {
+  name: string
+  fullyqualifiedname: string
+  currencyid: string
+  parent: string
+  systemid: string
+  launchsystemid: string
+  options: number
+  proofprotocol: number
+  notarizationprotocol: number
+  initialsupply: number
+  supply?: number
+  preallocations?: Preallocation[]
+  bestcurrencystate?: {
+    supply?: number
+    reservecurrencies?: ReserveCurrency[]
+  }
+  startblock?: number
+  definitiontxid?: string
+  definitiontxout?: number
+  // Add any other relevant fields you want!
+}
+
 const copyToClipboard = (value: string) => {
   navigator.clipboard.writeText(value)
   toast.success('Copied to clipboard!')
 }
 
-export default function CurrencyLookupPage() {
-  // NEW: Get query param from URL (if present)
+export default function CurrencyLookupPageWrapper() {
+    return (
+      <Suspense fallback={<div className="py-32 flex justify-center"><Loader2 className="animate-spin h-8 w-8" /></div>}>
+        <CurrencyLookupPage />
+      </Suspense>
+    );
+  }
+
+function CurrencyLookupPage() {
   const searchParams = useSearchParams()
   const urlQuery = searchParams.get('query') || ''
 
-  // --- These two sync input and actual submitted query ---
   const [query, setQuery] = useState<string>(urlQuery)
   const [searchVal, setSearchVal] = useState<string>(urlQuery)
 
-  // Sync input/submit if URL query param changes (for browser nav/etc)
   useEffect(() => {
     if (urlQuery && urlQuery !== query) {
       setQuery(urlQuery)
       setSearchVal(urlQuery)
     }
     // Only runs if urlQuery changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlQuery])
 
-  // --- Query logic ---
-  const currencyQuery = useQuery({
+  const currencyQuery = useQuery<CurrencyResult>({
     queryKey: ['getcurrency', query],
     queryFn: async () => {
       const res = await fetch('/api/getcurrency', {
@@ -44,7 +81,7 @@ export default function CurrencyLookupPage() {
       })
       const data = await res.json()
       if (data?.error || !data?.result) throw new Error(data?.error || 'Currency not found')
-      return data.result
+      return data.result as CurrencyResult
     },
     enabled: !!query,
     refetchOnWindowFocus: false,
@@ -99,9 +136,7 @@ export default function CurrencyLookupPage() {
   )
 }
 
-function CurrencyAccordion({ data }: { data: any }) {
-  // Detect categories (you can tweak as more kinds come up!)
-  // --- Core Info
+function CurrencyAccordion({ data }: { data: CurrencyResult }) {
   return (
     <Accordion type="multiple" className="border rounded-lg bg-muted/10">
       {/* General Info */}
@@ -128,34 +163,33 @@ function CurrencyAccordion({ data }: { data: any }) {
         </AccordionContent>
       </AccordionItem>
       {/* Preallocations */}
-{Array.isArray(data.preallocations) && data.preallocations.length > 0 && (
-  <AccordionItem value="preallocations">
-    <AccordionTrigger>Preallocations</AccordionTrigger>
-    <AccordionContent>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-xs">
-          <thead>
-            <tr>
-              <th className="text-left p-1">Address (i-address)</th>
-              <th className="text-left p-1">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* preallocations is an array of objects like [{address: amount}, ...] */}
-            {data.preallocations.map((e: Record<string, number>, idx: number) =>
-              Object.entries(e).map(([addr, amt]) => (
-                <tr key={addr + '-' + idx}>
-                  <td className="p-1">{addr} <CopyBtn value={addr} /></td>
-                  <td className="p-1">{renderNum(amt)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </AccordionContent>
-  </AccordionItem>
-)}
+      {Array.isArray(data.preallocations) && data.preallocations.length > 0 && (
+        <AccordionItem value="preallocations">
+          <AccordionTrigger>Preallocations</AccordionTrigger>
+          <AccordionContent>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-xs">
+                <thead>
+                  <tr>
+                    <th className="text-left p-1">Address (i-address)</th>
+                    <th className="text-left p-1">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.preallocations.map((e, idx) =>
+                    Object.entries(e).map(([addr, amt]) => (
+                      <tr key={addr + '-' + idx}>
+                        <td className="p-1">{addr} <CopyBtn value={addr} /></td>
+                        <td className="p-1">{renderNum(amt)}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      )}
       {/* Basket / Reserve structure */}
       {data.bestcurrencystate?.reservecurrencies && data.bestcurrencystate.reservecurrencies.length > 0 && (
         <AccordionItem value="basket">
@@ -172,7 +206,7 @@ function CurrencyAccordion({ data }: { data: any }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.bestcurrencystate.reservecurrencies.map((rc: any, i: number) => (
+                  {data.bestcurrencystate.reservecurrencies.map((rc) => (
                     <tr key={rc.currencyid}>
                       <td className="p-1">{rc.currencyid} <CopyBtn value={rc.currencyid} /></td>
                       <td className="p-1">{renderNum(rc.weight)}</td>
@@ -208,7 +242,7 @@ function CurrencyAccordion({ data }: { data: any }) {
   )
 }
 
-function renderNum(val: any): string {
+function renderNum(val: number | undefined | null): string {
   if (val === undefined || val === null) return '-'
   return Number(val).toLocaleString(undefined, { minimumFractionDigits: 8, maximumFractionDigits: 8 })
 }
