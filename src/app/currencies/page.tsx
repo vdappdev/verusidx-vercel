@@ -8,14 +8,14 @@ const UNIQUE_TYPE_LABELS = [
   { label: 'Simple Token', isType: (opt: number) => opt === 32 || opt === 40 },
   { label: 'Basket Currency', isType: (opt: number) => opt === 33 || opt === 41 },
   { label: 'Gateway Converter', isType: (opt: number) => opt === 545 },
-  { label: 'Outside System', isType: (opt: number) => opt === 128 },
+  { label: 'Gateway', isType: (opt: number) => opt === 128 },
   { label: 'PBaaS Chain', isType: (opt: number) => opt === 264 || opt === 268 },
   { label: 'ID Control Token', isType: (opt: number) => opt === 2080 },
 ]
 const PROVENANCE_MAP: Record<number, string> = {
   1: 'Decentralized',
   2: 'Centralized',
-  3: 'Mapped ERC20'
+  3: 'Mapped Ethereum'
 }
 const PAGE_SIZE = 20
 
@@ -114,7 +114,7 @@ export default function CurrenciesPage() {
   // For showing active chips/tags
   let activeChip = ''
   if (activeSource === 'systemtype' && systemtype) activeChip = `System Type: ${systemtype}`
-  if (activeSource === 'erc20') activeChip = 'All mapped ERC20s'
+  if (activeSource === 'erc20') activeChip = 'All mapped Ethereum'
   if (activeSource === 'converter') activeChip = `Converter(s): ${[converter1, converter2].filter(Boolean).join(', ')}`
 
   // Table columns
@@ -153,7 +153,7 @@ export default function CurrenciesPage() {
         <button
           onClick={clickERC20}
           className={`px-3 py-1 rounded font-semibold border ${activeSource === 'erc20' ? 'bg-blue-600 text-white border-blue-700' : ''}`}>
-          All mapped ERC20s
+          All mapped Ethereum
         </button>
         {/* Converters Inputs */}
         <form onSubmit={e => { e.preventDefault(); clickConverters(); }} className="flex gap-1 items-center">
@@ -162,7 +162,7 @@ export default function CurrenciesPage() {
             type="text"
             value={converter1}
             onChange={e => setConverter1(e.target.value)}
-            placeholder="Reserve Name"
+            placeholder="Reserve 1 Name"
             className="px-1 py-1 rounded border dark:bg-[#232323] dark:text-white text-xs"
             style={{width: 120}}
           />
@@ -170,7 +170,7 @@ export default function CurrenciesPage() {
             type="text"
             value={converter2}
             onChange={e => setConverter2(e.target.value)}
-            placeholder="Reserve (optional)"
+            placeholder="Reserve 2 (optional)"
             className="px-1 py-1 rounded border dark:bg-[#232323] dark:text-white text-xs"
             style={{width: 140}}
           />

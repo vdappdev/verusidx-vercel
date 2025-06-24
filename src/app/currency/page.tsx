@@ -40,6 +40,26 @@ interface CurrencyResult {
   startblock?: number
   definitiontxid?: string
   definitiontxout?: number
+  nativecurrencyid?: { address: string; type?: number } | string
+  idregistrationfees?: number
+  idreferrallevels?: number
+  idimportfees?: number
+  currencyregistrationfee?: number
+  pbaassystemregistrationfee?: number
+  currencyimportfee?: number
+  transactionimportfee?: number
+  transactionexportfee?: number
+  currencynames?: Record<string, string>
+  currencies?: string[]
+conversions?: number[]
+minpreconversion?: number[]
+maxpreconversion?: number[]
+prelaunchcarveout?: number
+initialcontributions?: number[]
+gateway?: string
+gatewayconverterid?: string
+gatewayconvertername?: string
+gatewayconverterissuance?: number
   // Add any other relevant fields you want!
 }
 
@@ -151,9 +171,20 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
           <DetailRow label="Launch System ID">{data.launchsystemid}</DetailRow>
           <DetailRow label="Options">{data.options}</DetailRow>
           <DetailRow label="Proof Protocol">{data.proofprotocol}</DetailRow>
-          <DetailRow label="Notarization Protocol">{data.notarizationprotocol}</DetailRow>
         </AccordionContent>
       </AccordionItem>
+      {/* Native Currency Info */}
+{data.nativecurrencyid && (
+  <AccordionItem value="nativecurrencyid">
+    <AccordionTrigger>Native Currency</AccordionTrigger>
+    <AccordionContent>
+      <DetailRow label="Address">{typeof data.nativecurrencyid === 'object' ? data.nativecurrencyid.address : data.nativecurrencyid}</DetailRow>
+      {typeof data.nativecurrencyid === 'object' && data.nativecurrencyid && 'type' in data.nativecurrencyid &&
+  <DetailRow label="Type">{data.nativecurrencyid.type}</DetailRow>
+}
+    </AccordionContent>
+  </AccordionItem>
+)}
       {/* Supply & State */}
       <AccordionItem value="supply">
         <AccordionTrigger>Supply & State</AccordionTrigger>
@@ -162,34 +193,35 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
           <DetailRow label="Supply">{renderNum(data.bestcurrencystate?.supply ?? data.supply)}</DetailRow>
         </AccordionContent>
       </AccordionItem>
-      {/* Preallocations */}
-      {Array.isArray(data.preallocations) && data.preallocations.length > 0 && (
-        <AccordionItem value="preallocations">
-          <AccordionTrigger>Preallocations</AccordionTrigger>
-          <AccordionContent>
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs">
-                <thead>
-                  <tr>
-                    <th className="text-left p-1">Address (i-address)</th>
-                    <th className="text-left p-1">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.preallocations.map((e, idx) =>
-                    Object.entries(e).map(([addr, amt]) => (
-                      <tr key={addr + '-' + idx}>
-                        <td className="p-1">{addr} <CopyBtn value={addr} /></td>
-                        <td className="p-1">{renderNum(amt)}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      )}
+      
+
+{/* Currency Names Map */}
+{data.currencynames && Object.keys(data.currencynames).length > 0 && (
+  <AccordionItem value="currencynames">
+    <AccordionTrigger>Currency Names</AccordionTrigger>
+    <AccordionContent>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-xs">
+          <thead>
+            <tr>
+              <th className="text-left p-1">Currency ID</th>
+              <th className="text-left p-1">Fully Qualified Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(data.currencynames).map(([id, name]) => (
+              <tr key={id}>
+                <td className="p-1">{id} <CopyBtn value={id} /></td>
+                <td className="p-1">{name}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </AccordionContent>
+  </AccordionItem>
+)}
+
       {/* Basket / Reserve structure */}
       {data.bestcurrencystate?.reservecurrencies && data.bestcurrencystate.reservecurrencies.length > 0 && (
         <AccordionItem value="basket">
@@ -220,6 +252,126 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
           </AccordionContent>
         </AccordionItem>
       )}
+      
+{/* ID/Fee Info */}
+{(data.idregistrationfees !== undefined || data.idreferrallevels !== undefined || data.idimportfees !== undefined) && (
+  <AccordionItem value="idfees">
+    <AccordionTrigger>ID/Fee Info</AccordionTrigger>
+    <AccordionContent>
+      {data.idregistrationfees !== undefined && <DetailRow label="ID Registration Fees">{renderNum(data.idregistrationfees)}</DetailRow>}
+      {data.idreferrallevels !== undefined && <DetailRow label="ID Referral Levels">{data.idreferrallevels}</DetailRow>}
+      {data.idimportfees !== undefined && <DetailRow label="ID Import Fees">{renderNum(data.idimportfees)}</DetailRow>}
+    </AccordionContent>
+  </AccordionItem>
+)}
+
+{/* Multicurrency PBaaS */}
+{(
+  data.currencyregistrationfee !== undefined ||
+  data.pbaassystemregistrationfee !== undefined ||
+  data.currencyimportfee !== undefined ||
+  data.transactionimportfee !== undefined ||
+  data.transactionexportfee !== undefined
+) && (
+  <AccordionItem value="multicurrencypbaas">
+    <AccordionTrigger>Multicurrency PBaaS</AccordionTrigger>
+    <AccordionContent>
+      {data.currencyregistrationfee !== undefined && <DetailRow label="Currency Registration Fee">{renderNum(data.currencyregistrationfee)}</DetailRow>}
+      {data.pbaassystemregistrationfee !== undefined && <DetailRow label="PBaaS System Registration Fee">{renderNum(data.pbaassystemregistrationfee)}</DetailRow>}
+      {data.currencyimportfee !== undefined && <DetailRow label="Currency Import Fee">{renderNum(data.currencyimportfee)}</DetailRow>}
+      {data.transactionimportfee !== undefined && <DetailRow label="Transaction Import Fee">{renderNum(data.transactionimportfee)}</DetailRow>}
+      {data.transactionexportfee !== undefined && <DetailRow label="Transaction Export Fee">{renderNum(data.transactionexportfee)}</DetailRow>}
+    </AccordionContent>
+  </AccordionItem>
+)}
+      {/* Preconversion */}
+      {(
+  (Array.isArray(data.currencies) && data.currencies.length > 0) ||
+  (Array.isArray(data.conversions) && data.conversions.length > 0) ||
+  (Array.isArray(data.minpreconversion) && data.minpreconversion.length > 0) ||
+  (Array.isArray(data.maxpreconversion) && data.maxpreconversion.length > 0) ||
+  data.prelaunchcarveout !== undefined ||
+  (Array.isArray(data.initialcontributions) && data.initialcontributions.length > 0) ||
+  (Array.isArray(data.preallocations) && data.preallocations.length > 0)
+) && (
+  <AccordionItem value="preconversion">
+    <AccordionTrigger>Preconversion</AccordionTrigger>
+    <AccordionContent>
+      {Array.isArray(data.currencies) && data.currencies.length > 0 && (
+        <DetailRow label="Currencies">
+          {data.currencies.join(', ')}
+        </DetailRow>
+      )}
+      {Array.isArray(data.conversions) && data.conversions.length > 0 && (
+        <DetailRow label="Conversions">
+          {data.conversions.map((c: number, idx: number) => renderNum(c)).join(', ')}
+        </DetailRow>
+      )}
+      {Array.isArray(data.minpreconversion) && data.minpreconversion.length > 0 && (
+        <DetailRow label="Min Preconversion">
+          {data.minpreconversion.map((c: number) => renderNum(c)).join(', ')}
+        </DetailRow>
+      )}
+      {Array.isArray(data.maxpreconversion) && data.maxpreconversion.length > 0 && (
+        <DetailRow label="Max Preconversion">
+          {data.maxpreconversion.map((c: number) => renderNum(c)).join(', ')}
+        </DetailRow>
+      )}
+      {data.prelaunchcarveout !== undefined && (
+        <DetailRow label="Prelaunch Carveout">{renderNum(data.prelaunchcarveout)}</DetailRow>
+      )}
+      {Array.isArray(data.initialcontributions) && data.initialcontributions.length > 0 && (
+        <DetailRow label="Initial Contributions">
+          {data.initialcontributions.map((c: number) => renderNum(c)).join(', ')}
+        </DetailRow>
+      )}
+      {/* Preallocations moved here */}
+      {Array.isArray(data.preallocations) && data.preallocations.length > 0 && (
+        <div className="mt-2">
+          <div className="font-semibold mb-1 text-xs text-muted-foreground">Preallocations</div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-xs">
+              <thead>
+                <tr>
+                  <th className="text-left p-1">Address (i-address)</th>
+                  <th className="text-left p-1">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.preallocations.map((e: Record<string, number>, idx: number) =>
+                  Object.entries(e).map(([addr, amt]) => (
+                    <tr key={addr + '-' + idx}>
+                      <td className="p-1">{addr} <CopyBtn value={addr} /></td>
+                      <td className="p-1">{renderNum(amt)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </AccordionContent>
+  </AccordionItem>
+)}
+{/* Gateway */}
+{(
+  data.gateway !== undefined ||
+  data.gatewayconverterid !== undefined ||
+  data.gatewayconvertername !== undefined ||
+  data.gatewayconverterissuance !== undefined
+) && (
+  <AccordionItem value="gatewayinfo">
+    <AccordionTrigger>Gateway Info</AccordionTrigger>
+    <AccordionContent>
+      {data.gateway !== undefined && <DetailRow label="Gateway">{data.gateway}</DetailRow>}
+      {data.gatewayconverterid !== undefined && <DetailRow label="Gateway Converter ID">{data.gatewayconverterid}</DetailRow>}
+      {data.gatewayconvertername !== undefined && <DetailRow label="Gateway Converter Name">{data.gatewayconvertername}</DetailRow>}
+      {data.gatewayconverterissuance !== undefined && <DetailRow label="Gateway Converter Issuance">{renderNum(data.gatewayconverterissuance)}</DetailRow>}
+    </AccordionContent>
+  </AccordionItem>
+)}
+
       {/* Transactions */}
       <AccordionItem value="tx">
         <AccordionTrigger>Blockchain Info</AccordionTrigger>
@@ -234,8 +386,9 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
             >
               {data.definitiontxid}
             </a>
-            {`  (vout ${data.definitiontxout})`}
           </DetailRow>
+          <DetailRow label="Definition Tx Out">{data.definitiontxout}</DetailRow>
+          <DetailRow label="Notarization Protocol">{data.notarizationprotocol}</DetailRow>
         </AccordionContent>
       </AccordionItem>
     </Accordion>
