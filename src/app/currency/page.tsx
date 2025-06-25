@@ -36,7 +36,10 @@ interface CurrencyResult {
   bestcurrencystate?: {
     supply?: number
     reservecurrencies?: ReserveCurrency[]
-  }
+    primarycurrencyfees?: number
+    primarycurrencyconversionfees?: number
+    primarycurrencyout?: number
+    preconvertedout?: number}
   startblock?: number
   definitiontxid?: string
   definitiontxout?: number
@@ -284,6 +287,30 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
     </AccordionContent>
   </AccordionItem>
 )}
+{(
+  data.bestcurrencystate?.primarycurrencyfees !== undefined ||
+  data.bestcurrencystate?.primarycurrencyconversionfees !== undefined ||
+  data.bestcurrencystate?.primarycurrencyout !== undefined ||
+  data.bestcurrencystate?.preconvertedout !== undefined
+) && (
+  <AccordionItem value="currencyfees">
+    <AccordionTrigger>Currency Fees</AccordionTrigger>
+    <AccordionContent>
+      {data.bestcurrencystate?.primarycurrencyfees !== undefined && (
+        <DetailRow label="Primary Currency Fees">{renderNum(data.bestcurrencystate.primarycurrencyfees)}</DetailRow>
+      )}
+      {data.bestcurrencystate?.primarycurrencyconversionfees !== undefined && (
+        <DetailRow label="Primary Currency Conversion Fees">{renderNum(data.bestcurrencystate.primarycurrencyconversionfees)}</DetailRow>
+      )}
+      {data.bestcurrencystate?.primarycurrencyout !== undefined && (
+        <DetailRow label="Primary Currency Out">{renderNum(data.bestcurrencystate.primarycurrencyout)}</DetailRow>
+      )}
+      {data.bestcurrencystate?.preconvertedout !== undefined && (
+        <DetailRow label="Preconverted Out">{renderNum(data.bestcurrencystate.preconvertedout)}</DetailRow>
+      )}
+    </AccordionContent>
+  </AccordionItem>
+)}
       {/* Preconversion */}
       {(
   (Array.isArray(data.currencies) && data.currencies.length > 0) ||
@@ -304,7 +331,7 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
       )}
       {Array.isArray(data.conversions) && data.conversions.length > 0 && (
         <DetailRow label="Conversions">
-          {data.conversions.map((c: number, idx: number) => renderNum(c)).join(', ')}
+          {data.conversions.map((c: number) => renderNum(c)).join(', ')}
         </DetailRow>
       )}
       {Array.isArray(data.minpreconversion) && data.minpreconversion.length > 0 && (
@@ -338,9 +365,9 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
                 </tr>
               </thead>
               <tbody>
-                {data.preallocations.map((e: Record<string, number>, idx: number) =>
+                {data.preallocations.map((e: Record<string, number>) =>
                   Object.entries(e).map(([addr, amt]) => (
-                    <tr key={addr + '-' + idx}>
+                    <tr key={addr}>
                       <td className="p-1">{addr} <CopyBtn value={addr} /></td>
                       <td className="p-1">{renderNum(amt)}</td>
                     </tr>
