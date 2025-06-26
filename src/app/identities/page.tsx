@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { NameTooltip } from "@/components/ui/name-tooltip"
 import { Copy, Loader2, Search } from 'lucide-react'
 import { toast } from "sonner"
 
@@ -121,14 +122,38 @@ function IdentityAccordion({ data }: { data: IdentityResult }) {
       <AccordionItem value="authorities">
         <AccordionTrigger>Authorities</AccordionTrigger>
         <AccordionContent>
-          <DetailRow label="Primary Addresses">
-            <span className="flex flex-wrap gap-1">{identity.primaryaddresses.map(addr =>
-              <CopyableValue key={addr} value={addr} />
-            )}</span>
-          </DetailRow>
+        <DetailRow label="Primary Addresses">
+  <span className="flex flex-wrap gap-2">
+    {identity.primaryaddresses.map(addr => (
+      <span key={addr} className="flex items-center gap-1">
+        <a
+          href={`https://insight.verus.io/address/${addr}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline"
+          title="View on Verus Explorer"
+        >
+          {addr}
+        </a>
+      </span>
+    ))}
+  </span>
+</DetailRow>
           <DetailRow label="Minimum Signatures">{identity.minimumsignatures}</DetailRow>
-          <DetailRow label="Revocation Authority" copy>{identity.revocationauthority}</DetailRow>
-          <DetailRow label="Recovery Authority" copy>{identity.recoveryauthority}</DetailRow>
+          <DetailRow label="Revocation Authority" copy>
+  <NameTooltip iAddress={identity.revocationauthority} type="identity">
+    <span className="underline decoration-dotted cursor-help">
+      {identity.revocationauthority}
+    </span>
+  </NameTooltip>
+</DetailRow>
+<DetailRow label="Recovery Authority" copy>
+  <NameTooltip iAddress={identity.recoveryauthority} type="identity">
+    <span className="underline decoration-dotted cursor-help">
+      {identity.recoveryauthority}
+    </span>
+  </NameTooltip>
+</DetailRow>
           <DetailRow label="Private Address" copy>
             {identity.privateaddress ?? <em className="text-gray-400">none</em>}
           </DetailRow>
@@ -242,21 +267,5 @@ function DetailRow({
           </button> : null}
       </span>
     </div>
-  )
-}
-
-function CopyableValue({ value }: { value: string }) {
-  return (
-    <span className="group relative">
-      <span>{value}</span>
-      <button
-        type="button"
-        onClick={() => copyToClipboard(value)}
-        className="p-1 ml-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition"
-        title="Copy to clipboard"
-      >
-        <Copy className="h-3 w-3 text-gray-400" />
-      </button>
-    </span>
   )
 }

@@ -6,6 +6,8 @@ import { useSearchParams } from 'next/navigation'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { AddressLink } from "@/components/ui/address-link"
+import { NameTooltip } from "@/components/ui/name-tooltip"
 import { Copy, Loader2, Search } from 'lucide-react'
 import { toast } from "sonner"
 
@@ -179,14 +181,31 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
       {/* Native Currency Info */}
 {data.nativecurrencyid && (
   <AccordionItem value="nativecurrencyid">
-    <AccordionTrigger>Native Currency</AccordionTrigger>
-    <AccordionContent>
-      <DetailRow label="Address">{typeof data.nativecurrencyid === 'object' ? data.nativecurrencyid.address : data.nativecurrencyid}</DetailRow>
-      {typeof data.nativecurrencyid === 'object' && data.nativecurrencyid && 'type' in data.nativecurrencyid &&
-  <DetailRow label="Type">{data.nativecurrencyid.type}</DetailRow>
-}
-    </AccordionContent>
-  </AccordionItem>
+  <AccordionTrigger>Native Currency</AccordionTrigger>
+  <AccordionContent>
+    <DetailRow label="Address">
+      <span className="flex items-center gap-1 whitespace-nowrap overflow-x-auto">
+        <AddressLink
+          address={
+            typeof data.nativecurrencyid === "object"
+              ? data.nativecurrencyid.address
+              : (data.nativecurrencyid as string)
+          }
+        />
+        <CopyBtn
+          value={
+            typeof data.nativecurrencyid === "object"
+              ? data.nativecurrencyid.address
+              : (data.nativecurrencyid as string)
+          }
+        />
+      </span>
+    </DetailRow>
+    {typeof data.nativecurrencyid === "object" && "type" in data.nativecurrencyid && (
+      <DetailRow label="Type">{data.nativecurrencyid.type}</DetailRow>
+    )}
+  </AccordionContent>
+</AccordionItem>
 )}
       {/* Supply & State */}
       <AccordionItem value="supply">
@@ -326,8 +345,16 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
     <AccordionContent>
       {Array.isArray(data.currencies) && data.currencies.length > 0 && (
         <DetailRow label="Currencies">
-          {data.currencies.join(', ')}
-        </DetailRow>
+        <span className="flex flex-wrap gap-2">
+          {data.currencies.map((addr: string) => (
+            <NameTooltip key={addr} iAddress={addr} type="currency">
+              <span className="underline decoration-dotted cursor-help">
+                {addr}
+              </span>
+            </NameTooltip>
+          ))}
+        </span>
+      </DetailRow>      
       )}
       {Array.isArray(data.conversions) && data.conversions.length > 0 && (
         <DetailRow label="Conversions">
@@ -354,30 +381,37 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
       )}
       {/* Preallocations moved here */}
       {Array.isArray(data.preallocations) && data.preallocations.length > 0 && (
-        <div className="mt-2">
-          <div className="font-semibold mb-1 text-xs text-muted-foreground">Preallocations</div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-xs">
-              <thead>
-                <tr>
-                  <th className="text-left p-1">Address (i-address)</th>
-                  <th className="text-left p-1">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.preallocations.map((e: Record<string, number>) =>
-                  Object.entries(e).map(([addr, amt]) => (
-                    <tr key={addr}>
-                      <td className="p-1">{addr} <CopyBtn value={addr} /></td>
-                      <td className="p-1">{renderNum(amt)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+  <div className="mt-2">
+    <div className="font-semibold mb-1 text-xs text-muted-foreground">Preallocations</div>
+    <div className="overflow-x-auto">
+      <table className="min-w-full text-xs">
+        <thead>
+          <tr>
+            <th className="text-left p-1">Address (i-address)</th>
+            <th className="text-left p-1">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.preallocations.map((e: Record<string, number>) =>
+            Object.entries(e).map(([addr, amt]) => (
+              <tr key={addr}>
+                <td className="p-1">
+                  <NameTooltip iAddress={addr} type="identity">
+                    <span className="underline decoration-dotted cursor-help">
+                      {addr}
+                    </span>
+                  </NameTooltip>
+                  <CopyBtn value={addr} />
+                </td>
+                <td className="p-1">{renderNum(amt)}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
     </AccordionContent>
   </AccordionItem>
 )}
