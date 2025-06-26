@@ -262,7 +262,13 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
                 <tbody>
                   {data.bestcurrencystate.reservecurrencies.map((rc) => (
                     <tr key={rc.currencyid}>
-                      <td className="p-1">{rc.currencyid} <CopyBtn value={rc.currencyid} /></td>
+                      <td className="p-1">
+  <NameTooltip iAddress={rc.currencyid} type="currency">
+    <span className="underline decoration-dotted cursor-help">
+      {rc.currencyid}
+    </span>
+  </NameTooltip>
+</td>
                       <td className="p-1">{renderNum(rc.weight)}</td>
                       <td className="p-1">{renderNum(rc.reserves)}</td>
                       <td className="p-1">{renderNum(rc.priceinreserve)}</td>
