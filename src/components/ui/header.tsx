@@ -55,6 +55,12 @@ export function Header() {
   >
     Currency Lookup
   </Link>
+  <Link
+    href="/addressviewer"
+    className="font-medium text-lg text-gray-700 dark:text-gray-100 hover:text-[#3165D4] dark:hover:text-[#3165D4] transition-colors"
+  >
+    Address Viewer
+  </Link>
 </nav>
   </div>
   {/* Theme Switch */}

@@ -106,6 +106,24 @@ Provenance (using "proofprotocol": 1 is "decentralized", 2 is "centralized", 3 i
 
 ---
 
+
+
+### 2.5 Address Viewer Page
+
+**Flow:**
+- Distinct page similar to the others; user inputs an R-address or ID@ name (can have spaces and/or emojis); then the page displays all the currencies and their balances within that address 
+- Fetches address balance via `getaddressbalance`
+- getaddressbalance "insert address here"
+
+- **UI/UX:**  
+    - At the top have "Currency Balance by Address" or "currency balance for address" 
+    - Form/field to input address with button "view" or user can also just press enter
+    - [Future: add it to identity lookup page for the ID@ and primary addresses so it can link open this address viewer page with that particular R address or "identity name@".]
+
+---
+
+
+
 #:zap: Future Feature(s) — Dashboard
 
 - Home dashboard (latest block number, # of currencies, trends, basic charts)
