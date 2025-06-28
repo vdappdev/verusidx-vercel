@@ -61,11 +61,25 @@ export default function IdentityLookupPage() {
         </div>
       )}
 
-      {identityQuery.error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded text-sm">
-          {(identityQuery.error as Error).message}
-        </div>
-      )}
+{identityQuery.error && (
+  <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 rounded text-sm flex items-start gap-2">
+    <span aria-hidden className="pt-0.5">
+      <svg width="20" height="20" fill="none" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/><path d="M10 6v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+    </span>
+    <span>
+      <strong>Identity not found.</strong><br />
+      Please check the spelling or format of the identity (<code className="bg-muted/60 px-1 rounded">name@</code> or <code className="bg-muted/60 px-1 rounded">i-address</code>).
+      <br />
+      {identityQuery.error.message.includes('Network') ?
+        <>Network error—please try again in a moment.</>
+        : null
+      }
+      {!identityQuery.error.message.includes('not found') && !identityQuery.error.message.includes('Network') &&
+        <details className="mt-1 text-xs"><summary className="cursor-pointer text-muted-foreground">Show error details</summary>{identityQuery.error.message}</details>
+      }
+    </span>
+  </div>
+)}
 
       {identityQuery.data && (
         <IdentityAccordion data={identityQuery.data} />

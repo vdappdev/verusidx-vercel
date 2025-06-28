@@ -86,15 +86,37 @@ export default function AddressViewerPage() {
         </div>
       )}
 
-      {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded text-sm">
-          {(error as Error).message}
-        </div>
-      )}
+{showNoBalances && (
+  <div className="py-4 text-gray-500 text-center">
+    No balances found for this address.
+  </div>
+)}
 
-      {showNoBalances && (
-        <div className="py-4 text-gray-500 text-center">No balances found for this address.</div>
-      )}
+      {error && (
+  <div className="p-4 border border-red-300 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300 rounded text-sm flex items-start gap-2">
+    <span aria-hidden className="pt-0.5">
+      <svg width="20" height="20" fill="none" viewBox="0 0 20 20">
+        {/* Red Circle with Exclamation */}
+        <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/>
+        <path d="M10 6v4m0 4h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    </span>
+    <span>
+      <strong>Could not load balances.</strong><br />
+      Please check the address or ID@ spelling and try again.<br />
+      {error.message.includes('Network') ?
+        <>Network error &mdash; please try again in a moment.</>
+        : null
+      }
+      {!error.message.toLowerCase().includes('not found') && !error.message.toLowerCase().includes('network') &&
+        <details className="mt-1 text-xs">
+          <summary className="cursor-pointer text-muted-foreground">Show error details</summary>
+          {error.message}
+        </details>
+      }
+    </span>
+  </div>
+)}
 
 {data?.result && !showNoBalances && (
   <BalancesTable result={data.result} />
