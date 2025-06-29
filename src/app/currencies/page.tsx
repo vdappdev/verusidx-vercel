@@ -227,8 +227,8 @@ export default function CurrenciesPage() {
         <div className="p-4 bg-red-100 text-red-700 rounded">Error: {(error as Error).message}</div>
       )}
       {paged.length > 0 && (
-        <div className="rounded-md overflow-x-auto border bg-white/95 dark:bg-[#181818]/60 mt-3 mb-2">
-          <table className="w-full min-w-[1100px] text-sm">
+        <div className="rounded-md border bg-white/95 dark:bg-[#181818]/60 mt-3 mb-2">
+          <table className="w-full text-sm">
             <thead>
               <tr>
                 {TABLE_HEADERS.map(col =>
