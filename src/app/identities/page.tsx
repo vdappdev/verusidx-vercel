@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { NameTooltip } from "@/components/ui/name-tooltip"
 import { Copy, Loader2, Search } from 'lucide-react'
 import { toast } from "sonner"
+import { ExternalLink } from '@/components/ui/external-link'
 
 const copyToClipboard = (value: string) => {
   navigator.clipboard.writeText(value)
@@ -140,15 +141,12 @@ function IdentityAccordion({ data }: { data: IdentityResult }) {
   <span className="flex flex-wrap gap-2">
     {identity.primaryaddresses.map(addr => (
       <span key={addr} className="flex items-center gap-1">
-        <a
+        <ExternalLink
           href={`https://insight.verus.io/address/${addr}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-          title="View on Verus Explorer"
+          showIcon={false}
         >
           {addr}
-        </a>
+        </ExternalLink>
       </span>
     ))}
   </span>
@@ -185,14 +183,12 @@ function IdentityAccordion({ data }: { data: IdentityResult }) {
             <BlockExplorerLink blockHeight={data.blockheight} />
           </DetailRow>
           <DetailRow label="TXID">
-            <a
+            <ExternalLink
               href={`https://insight.verus.io/tx/${data.txid}`}
-              target="_blank"
-              rel="noopener"
-              className="text-blue-600 hover:underline"
+              showIcon={false}
             >
               {data.txid}
-            </a>
+            </ExternalLink>
           </DetailRow>
           <DetailRow label="VOUT">{data.vout}</DetailRow>
         </AccordionContent>
@@ -244,14 +240,12 @@ function BlockExplorerLink({ blockHeight }: { blockHeight: number }) {
 
   if (!blockhash) return <span>{blockHeight}</span>
   return (
-    <a
+    <ExternalLink
       href={`https://insight.verus.io/block/${blockhash}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 hover:underline"
+      showIcon={false}
     >
       {blockHeight}
-    </a>
+    </ExternalLink>
   )
 }
 

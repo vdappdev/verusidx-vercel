@@ -139,7 +139,7 @@ function BalancesTable({ result }: { result: AddressBalanceResult }) {
       .filter(row => !isNaN(row.balance)); // filter out any NaN
   
     return (
-      <div className="overflow-x-auto border rounded bg-white/95 dark:bg-[#181818]/70 shadow mt-2">
+      <div className="overflow-x-auto border rounded bg-white dark:bg-[#181818] shadow mt-2">
         <table className="min-w-full text-sm">
           <thead>
             <tr>

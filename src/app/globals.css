@@ -119,4 +119,33 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Cross-browser compatibility fixes */
+  /* Fix for webkit browsers (Safari, Brave on macOS) */
+  @supports (-webkit-backdrop-filter: blur(10px)) {
+    .supports-backdrop-blur {
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+  }
+  
+  /* Ensure sticky positioning works across browsers */
+  .sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+  
+  /* Fix for form elements in Safari/Webkit */
+  input, select, textarea, button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  /* Prevent white overlay issues in dark mode */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+    }
+  }
 }

@@ -10,6 +10,7 @@ import { AddressLink } from "@/components/ui/address-link"
 import { NameTooltip } from "@/components/ui/name-tooltip"
 import { Copy, Loader2, Search } from 'lucide-react'
 import { toast } from "sonner"
+import { ExternalLink } from '@/components/ui/external-link'
 
 // --- TYPES ---
 interface Preallocation {
@@ -459,14 +460,12 @@ function CurrencyAccordion({ data }: { data: CurrencyResult }) {
         <AccordionContent>
           <DetailRow label="Start Block">{data.startblock}</DetailRow>
           <DetailRow label="Definition TX">
-            <a
+            <ExternalLink
               href={`https://insight.verus.io/tx/${data.definitiontxid}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
+              showIcon={false}
             >
               {data.definitiontxid}
-            </a>
+            </ExternalLink>
           </DetailRow>
           <DetailRow label="Definition Tx Out">{data.definitiontxout}</DetailRow>
           <DetailRow label="Notarization Protocol">{data.notarizationprotocol}</DetailRow>

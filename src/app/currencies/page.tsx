@@ -135,7 +135,11 @@ export default function CurrenciesPage() {
       {/* --- PARAMETER Shortcuts/Inputs --- */}
       <div className="flex flex-wrap gap-2 items-center mb-3 pb-2 border-b border-muted">
         <button onClick={clickDefault}
-          className={`px-3 py-1 rounded font-semibold border ${activeSource === 'default' ? 'bg-blue-600 text-white border-blue-700' : ''}`}>
+          className={`px-3 py-1 rounded font-semibold border transition-colors ${
+            activeSource === 'default' 
+              ? 'bg-blue-600 text-white border-blue-700' 
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600'
+          }`}>
           Default
         </button>
         {/* Systemtype Dropdown */}
@@ -152,7 +156,11 @@ export default function CurrenciesPage() {
         </div>
         <button
           onClick={clickERC20}
-          className={`px-3 py-1 rounded font-semibold border ${activeSource === 'erc20' ? 'bg-blue-600 text-white border-blue-700' : ''}`}>
+          className={`px-3 py-1 rounded font-semibold border transition-colors ${
+            activeSource === 'erc20' 
+              ? 'bg-blue-600 text-white border-blue-700' 
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600'
+          }`}>
           All mapped Ethereum
         </button>
         {/* Converters Inputs */}
@@ -176,7 +184,7 @@ export default function CurrenciesPage() {
           />
           <button
             type="submit"
-            className={`px-2 py-1 rounded font-semibold border bg-gray-100 hover:bg-blue-100 dark:bg-[#232323] dark:hover:bg-blue-900 transition`}>
+            className="px-2 py-1 rounded font-semibold border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-600 hover:bg-blue-100 dark:hover:bg-blue-900 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
             Show
           </button>
         </form>
@@ -227,21 +235,27 @@ export default function CurrenciesPage() {
         <div className="p-4 bg-red-100 text-red-700 rounded">Error: {(error as Error).message}</div>
       )}
       {paged.length > 0 && (
-        <div className="rounded-md border bg-white/95 dark:bg-[#181818]/60 mt-3 mb-2">
-          <table className="w-full text-sm">
+        /* ORIGINAL: bg-white dark:bg-[#181818] mt-3 mb-2 overflow-x-auto */
+        <div className="bg-white dark:bg-[#181818] mt-3 mb-2 overflow-x-auto rounded-lg shadow-sm">
+          <table className="w-full text-sm border-collapse table-auto">
             <thead>
-              <tr>
+              <tr className="border-b border-gray-200 dark:border-gray-700">
                 {TABLE_HEADERS.map(col =>
                   <th
                     key={col.key}
                     className={`
                       text-left p-2 select-none font-semibold
-                      ${col.key === 'name' ? 'sticky left-0 z-20 bg-white dark:bg-[#181818] shadow-md border-r' : ''}
+                      ${col.key === 'name' ? 'sticky left-0 z-20 bg-white dark:bg-[#181818]' : ''}
                       ${col.sortable ? 'cursor-pointer' : ''}
                     `}
                     style={col.key === 'name'
-                      ? { minWidth: 200, maxWidth: 320 }
-                      : undefined}
+                      ? { minWidth: 200, maxWidth: 250, width: 250 }
+                      : col.key === 'currencyid' ? { width: '20%' } 
+                      : col.key === 'type' ? { width: '15%' }
+                      : col.key === 'proofprotocol' ? { width: '10%' }
+                      : col.key === 'supply' ? { width: '15%' }
+                      : col.key === 'startblock' ? { width: '10%' }
+                      : { width: '5%' }}
                     onClick={col.sortable
                       ? () => {
                           setSort(s =>
@@ -273,17 +287,18 @@ export default function CurrenciesPage() {
             </thead>
             <tbody>
               {paged.map(currency => (
-                <tr key={currency.currencydefinition.currencyid} className="border-b">
+                <tr key={currency.currencydefinition.currencyid} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                   {/* Sticky left column */}
-                  <td className="p-2 sticky left-0 z-10 bg-white dark:bg-[#181818] font-semibold shadow-md border-r whitespace-nowrap" style={{ minWidth: 200, maxWidth: 320 }}>
+                  {/* ORIGINAL: minWidth: 200, maxWidth: 320 */}
+                  <td className="p-2 sticky left-0 z-10 bg-white dark:bg-[#181818] font-semibold text-ellipsis overflow-hidden" style={{ minWidth: 200, maxWidth: 250, width: 250 }}>
                     {currency.currencydefinition.fullyqualifiedname}
                   </td>
                   <td className="p-2 whitespace-nowrap text-xs">{currency.currencydefinition.currencyid}</td>
                   <td className="p-2">{getTypeLabel(currency.currencydefinition.options)}</td>
                   <td className="p-2">{getProvenanceLabel(currency.currencydefinition.proofprotocol)}</td>
-                  <td className="p-2">{formatSupply(currency.bestcurrencystate?.supply)}</td>
-                  <td className="p-2">{currency.currencydefinition.startblock}</td>
-                  <td className="p-2">
+                  <td className="p-2 whitespace-nowrap">{formatSupply(currency.bestcurrencystate?.supply)}</td>
+                  <td className="p-2 whitespace-nowrap">{currency.currencydefinition.startblock}</td>
+                  <td className="p-2 whitespace-nowrap">
                     <a
                       href={`/currency?query=${encodeURIComponent(currency.currencydefinition.fullyqualifiedname)}`}
                       className="px-3 py-1 text-xs rounded bg-[#3165D4] text-white font-semibold hover:bg-blue-800 whitespace-nowrap"
@@ -301,17 +316,31 @@ export default function CurrenciesPage() {
       )}
       {/* Pagination */}
       <div className="flex flex-wrap gap-2 items-center justify-center mt-4">
-        <button onClick={() => goToPage(page - 1)} disabled={page === 1} className="px-3 py-1 rounded border disabled:opacity-30">Prev</button>
+        <button 
+          onClick={() => goToPage(page - 1)} 
+          disabled={page === 1} 
+          className="px-3 py-1 rounded border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        >
+          Prev
+        </button>
         {Array.from({ length: totalPages }, (_, i) =>
           <button
             key={i}
             onClick={() => goToPage(i + 1)}
-            className={`px-3 py-1 rounded border ${i + 1 === page
-              ? 'bg-blue-500 text-white font-bold border-blue-700'
-              : 'hover:bg-blue-50'}`}
+            className={`px-3 py-1 rounded border transition-colors ${
+              i + 1 === page
+                ? 'bg-blue-500 text-white font-bold border-blue-700'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300'
+            }`}
           >{i + 1}</button>
         )}
-        <button onClick={() => goToPage(page + 1)} disabled={page === totalPages} className="px-3 py-1 rounded border disabled:opacity-30">Next</button>
+        <button 
+          onClick={() => goToPage(page + 1)} 
+          disabled={page === totalPages} 
+          className="px-3 py-1 rounded border bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-400 dark:border-gray-600 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+        >
+          Next
+        </button>
       </div>
     </main>
   )

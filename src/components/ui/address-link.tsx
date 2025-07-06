@@ -17,7 +17,7 @@ export const AddressLink: React.FC<AddressLinkProps> = ({ address, className }) 
         href={`https://etherscan.io/address/${address}`}
         target="_blank"
         rel="noopener noreferrer"
-        className={className ? `text-blue-600 hover:underline ${className}` : "text-blue-600 hover:underline"}
+        className={className ? `text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded-sm ${className}` : "text-blue-600 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded-sm"}
         title="View on Etherscan"
       >
         {address}

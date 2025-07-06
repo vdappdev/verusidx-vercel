@@ -18,7 +18,7 @@ export function Header() {
       : "/logo/verus-icon-blue.svg";
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white/90 dark:bg-[#171923]/90 backdrop-blur border-b border-border">
+    <header className="sticky top-0 z-50 w-full bg-white dark:bg-[#171923] backdrop-blur supports-[backdrop-filter]:bg-white/90 dark:supports-[backdrop-filter]:bg-[#171923]/90 border-b border-border">
       <div className="max-w-5xl mx-auto flex items-center justify-between px-6 py-3">
   {/* Leading: Logo + App Name + Nav */}
   <div className="flex items-center gap-10">
